@@ -1,0 +1,13 @@
+services:
+  feedback:
+    build: .
+    image: curiobox-feedback:latest
+    ports:
+      - "3000:3000"
+    environment:
+      POCKETBASE_URL: https://pocketbase.curioboxapp.info
+      POCKETBASE_FEEDBACK_COLLECTION: app_feedback
+      # Koleksiyonun create kuralı herkese açık değilse doldurun:
+      # POCKETBASE_ADMIN_EMAIL: ""
+      # POCKETBASE_ADMIN_PASSWORD: ""
+    restart: unless-stopped
