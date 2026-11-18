@@ -1,133 +1,138 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+import PrefsBar from "./components/PrefsBar";
 import { APPS } from "@/lib/apps";
+import { getDictionary } from "@/lib/i18n";
+import { pickParam, resolveLocale, resolveTheme } from "@/lib/prefs";
 
-export const metadata = {
-  title: "Uğurcan Güden — Software Developer",
-  description:
-    "Uğurcan Güden · Software Developer. .NET, React, Next.js ve yapay zeka ajan mimarileri üzerine çalışan bir yazılım geliştirici.",
-};
+type SearchParams = Record<string, string | string[] | undefined>;
 
-const SKILLS = [
-  ".NET / .NET Core",
-  "React & React Native",
-  "Next.js",
-  "Angular",
-  "Docker & CI/CD",
-  "Redis",
-  "MSSQL / NoSQL",
-  "Microservices",
-];
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}): Promise<Metadata> {
+  const dict = getDictionary(
+    await resolveLocale(pickParam(await searchParams, "lang", "locale")),
+  );
+  return {
+    title: dict.meta.homeTitle,
+    description: dict.meta.homeDescription,
+  };
+}
 
-const TIMELINE = [
-  {
-    role: "Software Developer",
-    company: "Obase",
-    period: "Günümüz",
-    desc: "air ai uygulamasını geliştiriyoruz. Microsoft Agent Framework üzerine kurulu, çok modüllü bir yapay zeka platformu; Task MCP, Notification MCP ve daha birçok MCP servisini yazıyoruz.",
-    current: true,
-  },
-  {
-    role: "Software Developer",
-    company: "İntertech",
-    period: "2023 – 2024",
-    desc: "Ödeme sistemleri mikroservisleri (PaymentCommon, Directory Management), ortak NuGet/NPM paketleri ve altyapısal geliştirmeler.",
-  },
-  {
-    role: "Software Developer",
-    company: "Vakıfbank",
-    period: "2021 – 2023",
-    desc: "İnternet bankacılığı ekranları üzerinde çok sayıda geliştirme ve iyileştirme.",
-  },
-  {
-    role: "Junior → Mid Developer",
-    company: "Pixelsoft",
-    period: "2019 – 2021",
-    desc: "B2B web & mobil projeler: whindra, AyInvest, kontrat ve sipariş yönetim uygulamaları.",
-  },
-];
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const sp = await searchParams;
+  const locale = await resolveLocale(pickParam(sp, "lang", "locale"));
+  const theme = await resolveTheme();
+  const dict = getDictionary(locale);
+  const t = dict.home;
 
-export default function Home() {
+  const accentOf = (value: string) =>
+    APPS.find((app) => app.value === value)?.accent ?? "var(--signal)";
+  const nameOf = (value: string) =>
+    APPS.find((app) => app.value === value)?.label ?? value;
+
   return (
-    <main className="page about">
-      <div className="glow" aria-hidden />
+    <div className="shell">
+      <a className="skip" href="#main">
+        {dict.nav.skipToContent}
+      </a>
 
-      <section className="card">
-        <header className="intro">
-          <div className="avatar" aria-hidden>
-            UG
-          </div>
-          <div>
-            <span className="badge">Software Developer</span>
-            <h1>Uğurcan Güden</h1>
-            <p className="subtitle">
-              7+ yıllık deneyime sahip bir yazılım geliştiriciyim. Bugün{" "}
-              <strong>Obase</strong>&apos;de <strong>air ai</strong> adlı yapay
-              zeka platformunu geliştiriyoruz — Microsoft Agent Framework ve
-              birden fazla MCP servisiyle. İş saatleri dışında da açık kaynak
-              paketler üretmeye ve yeni teknolojiler öğrenmeye devam ediyorum.
-            </p>
-            <div className="links">
-              <a href="https://ugurcanguden.com/" target="_blank" rel="noreferrer">
-                🌐 ugurcanguden.com
-              </a>
+      <PrefsBar locale={locale} theme={theme} dict={dict} />
+
+      <main id="main">
+        <header className="masthead">
+          <p className="role">{t.role}</p>
+          <h1 className="name">
+            <span>{t.nameFirst}</span>
+            <span>{t.nameLast}</span>
+          </h1>
+          <hr />
+          <p className="intro">{t.intro}</p>
+          <p className="where">{t.based}</p>
+          <ul className="contact">
+            <li>
+              <a href="mailto:ugurcanguden@gmail.com">{t.emailLabel}</a>
+            </li>
+            <li>
               <a
                 href="https://github.com/ugurcanguden"
                 target="_blank"
                 rel="noreferrer"
               >
-                💻 GitHub
+                {t.githubLabel}
               </a>
-              <a href="mailto:ugurcanguden@gmail.com">✉️ E-posta</a>
-            </div>
-          </div>
+            </li>
+            <li>
+              <a href="https://ugurcanguden.com/" target="_blank" rel="noreferrer">
+                {t.siteLabel}
+              </a>
+            </li>
+          </ul>
         </header>
 
-        <div className="section">
-          <h2>Yetenekler</h2>
-          <ul className="chips">
-            {SKILLS.map((s) => (
-              <li key={s}>{s}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="section">
-          <h2>Deneyim</h2>
-          <ol className="timeline">
-            {TIMELINE.map((t) => (
-              <li key={t.company} className={t.current ? "now" : ""}>
-                <div className="t-head">
-                  <strong>{t.role}</strong>
-                  <span className="muted">· {t.company}</span>
-                  <span className="period">{t.period}</span>
+        <section className="block">
+          <h2>{t.experienceHeading}</h2>
+          <ol className="record">
+            {t.experience.map((entry) => (
+              <li key={entry.company} className={entry.current ? "live" : ""}>
+                <div className="year">
+                  {entry.years}
+                  {entry.current && <span className="now">{t.present}</span>}
                 </div>
-                <p>{t.desc}</p>
+                <div>
+                  <h3 className="job">
+                    {entry.role} <span className="at">{entry.company}</span>
+                  </h3>
+                  <p>{entry.desc}</p>
+                </div>
               </li>
             ))}
           </ol>
-        </div>
+        </section>
 
-        <div className="section cta-box">
-          <h2>Uygulamalarımız</h2>
-          <p className="subtitle">
-            Aşağıdaki uygulamalar için geri bildirimlerinizi bekliyoruz.
-          </p>
+        <section className="block">
+          <h2>{t.stackHeading}</h2>
+          <dl className="stack">
+            {t.stack.map((group) => (
+              <div key={group.area} style={{ display: "contents" }}>
+                <dt>{group.area}</dt>
+                <dd>{group.items}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <section className="block">
+          <h2>{t.appsHeading}</h2>
+          <p className="lede">{t.appsIntro}</p>
           <ul className="apps">
-            {APPS.filter((a) => a.value !== "general").map((a) => (
-              <li key={a.value} style={{ ["--accent" as string]: a.accent }}>
-                {a.label}
+            {t.apps.map((app) => (
+              <li key={app.value}>
+                <span
+                  className="mark"
+                  style={{ ["--accent" as string]: accentOf(app.value) }}
+                  aria-hidden
+                />
+                <strong>{nameOf(app.value)}</strong>
+                <span className="tag">{app.tagline}</span>
+                <Link href={`/feedback?app=${app.value}&lang=${locale}`}>
+                  {t.appFeedbackLink}
+                </Link>
               </li>
             ))}
           </ul>
-          <Link href="/feedback" className="submit as-link">
-            Geri Bildirim Gönder →
-          </Link>
-        </div>
-      </section>
+        </section>
+      </main>
 
       <footer className="foot">
-        © {new Date().getFullYear()} Uğurcan Güden · Menteşe / Muğla
+        {new Date().getFullYear()} {dict.footer}
       </footer>
-    </main>
+    </div>
   );
 }

@@ -1,0 +1,9 @@
+/** Tema sabitleri — hem client hem server tarafında kullanılabilir (saf modül). */
+
+export const THEME_COOKIE = "theme";
+export const THEMES = ["light", "dark"] as const;
+export type Theme = (typeof THEMES)[number];
+
+export function isTheme(value: unknown): value is Theme {
+  return typeof value === "string" && THEMES.includes(value as Theme);
+}

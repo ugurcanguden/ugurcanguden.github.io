@@ -27,6 +27,11 @@ export const PLATFORMS = [
   { value: "other", label: "Diğer" },
 ] as const;
 
+/** Uygulama adını seçili dile göre verir (marka adları çevrilmez, "general" çevrilir). */
+export function appLabel(app: AppOption, generalLabel: string): string {
+  return app.value === "general" ? generalLabel : app.label;
+}
+
 export function isValidApp(value: string): boolean {
   return APPS.some((a) => a.value === value);
 }
